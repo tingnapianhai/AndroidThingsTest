@@ -1,9 +1,12 @@
+# Local configuration file (sdk path, etc)
+local.properties
+
+# Intellij project files
 *.iml
-.gradle
-/local.properties
-/.idea/workspace.xml
-/.idea/libraries
+.idea/
+
 .DS_Store
-/build
-/captures
-.externalNativeBuild
+
+build
+.gradle
+projectFilesBackup
