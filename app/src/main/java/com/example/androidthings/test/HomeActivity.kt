@@ -3,6 +3,7 @@ package com.example.androidthings.test
 import android.app.Activity
 import android.os.Bundle
 import android.util.Log
+import android.widget.TextView
 import com.google.android.things.pio.Gpio
 import com.google.android.things.pio.GpioCallback
 import com.google.android.things.pio.PeripheralManagerService
@@ -42,8 +43,13 @@ class HomeActivity : Activity() {
   // GPIO connection to LED output
   private var mLedGpio: Gpio? = null
 
+  private var text: TextView? = null
+
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+    setContentView(R.layout.activity_home)
+
+    text = findViewById(R.id.text)
 
     val service = PeripheralManagerService()
     Log.d(TAG, "Available GPIO: " + service.gpioList)
@@ -73,7 +79,8 @@ class HomeActivity : Activity() {
     override fun onGpioEdge(gpio: Gpio?): Boolean {
       try {
         val buttonValue = gpio!!.value
-        mLedGpio?.setValue(buttonValue)
+        mLedGpio!!.value = buttonValue
+        updateText(buttonValue.toString())
         Log.i(TAG, "GPIO changed, button " + buttonValue)
       } catch (e: IOException) {
         Log.w(TAG, "Error reading GPIO")
@@ -82,6 +89,10 @@ class HomeActivity : Activity() {
       // Return true to keep callback active.
       return true
     }
+  }
+
+  private fun updateText(textStr: String) {
+    text!!.text = textStr
   }
 
   override fun onDestroy() {
