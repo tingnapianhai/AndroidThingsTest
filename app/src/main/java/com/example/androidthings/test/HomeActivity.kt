@@ -38,18 +38,18 @@ class HomeActivity : Activity() {
   private val LED_PIN_NAME = "GPIO_34"
 
   // GPIO connection to button input
-  private var mButtonGpio: Gpio? = null
+  private lateinit var mButtonGpio: Gpio
 
   // GPIO connection to LED output
-  private var mLedGpio: Gpio? = null
+  private lateinit var mLedGpio: Gpio
 
-  private var text: TextView? = null
+  private lateinit var textView: TextView
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_home)
 
-    text = findViewById(R.id.text)
+    textView = findViewById(R.id.textView)
 
     val service = PeripheralManagerService()
     Log.d(TAG, "Available GPIO: " + service.gpioList)
@@ -58,16 +58,16 @@ class HomeActivity : Activity() {
       // Create GPIO connection.
       mButtonGpio = service.openGpio(BUTTON_PIN_NAME)
       // Configure as an input, trigger events on every change.
-      mButtonGpio?.setDirection(Gpio.DIRECTION_IN)
-      mButtonGpio?.setEdgeTriggerType(Gpio.EDGE_BOTH)
+      mButtonGpio.setDirection(Gpio.DIRECTION_IN)
+      mButtonGpio.setEdgeTriggerType(Gpio.EDGE_BOTH)
       // Value is true when the pin is LOW
-      mButtonGpio?.setActiveType(Gpio.ACTIVE_LOW)
+      mButtonGpio.setActiveType(Gpio.ACTIVE_LOW)
       // Register the event callback.
-      mButtonGpio?.registerGpioCallback(mCallback);
+      mButtonGpio.registerGpioCallback(mCallback)
 
       mLedGpio = service.openGpio(LED_PIN_NAME)
       // Configure as an output.
-      mLedGpio?.setDirection(Gpio.DIRECTION_OUT_INITIALLY_LOW)
+      mLedGpio.setDirection(Gpio.DIRECTION_OUT_INITIALLY_LOW)
 
     } catch (e: IOException) {
       Log.w(TAG, "Error opening GPIO", e)
@@ -76,10 +76,10 @@ class HomeActivity : Activity() {
   }
 
   private val mCallback = object : GpioCallback() {
-    override fun onGpioEdge(gpio: Gpio?): Boolean {
+    override fun onGpioEdge(gpio: Gpio): Boolean {
       try {
-        val buttonValue = gpio!!.value
-        mLedGpio!!.value = buttonValue
+        val buttonValue = gpio.value
+        mLedGpio.value = buttonValue
         updateText(buttonValue.toString())
         Log.i(TAG, "GPIO changed, button " + buttonValue)
       } catch (e: IOException) {
@@ -92,29 +92,25 @@ class HomeActivity : Activity() {
   }
 
   private fun updateText(textStr: String) {
-    text!!.text = textStr
+    textView.text = textStr
   }
 
   override fun onDestroy() {
     super.onDestroy()
 
     // Close the button
-    if (mButtonGpio != null) {
-      mButtonGpio?.unregisterGpioCallback(mCallback)
-      try {
-        mButtonGpio?.close()
-      } catch (e: IOException) {
-        Log.w(TAG, "Error closing GPIO", e)
-      }
+    mButtonGpio.unregisterGpioCallback(mCallback)
+    try {
+      mButtonGpio.close()
+    } catch (e: IOException) {
+      Log.w(TAG, "Error closing GPIO", e)
     }
 
     // Close the LED.
-    if (mLedGpio != null) {
-      try {
-        mLedGpio?.close()
-      } catch (e: IOException) {
-        Log.e(TAG, "Error closing GPIO", e)
-      }
+    try {
+      mLedGpio.close()
+    } catch (e: IOException) {
+      Log.e(TAG, "Error closing GPIO", e)
     }
   }
 
