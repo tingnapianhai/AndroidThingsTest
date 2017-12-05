@@ -3,10 +3,10 @@ package com.example.androidthings.test
 import android.app.Activity
 import android.os.Bundle
 import android.util.Log
-import android.widget.TextView
 import com.google.android.things.pio.Gpio
 import com.google.android.things.pio.GpioCallback
 import com.google.android.things.pio.PeripheralManagerService
+import kotlinx.android.synthetic.main.activity_home.*
 import java.io.IOException
 
 
@@ -30,26 +30,22 @@ import java.io.IOException
  * @see <a href="https://github.com/androidthings/contrib-drivers#readme">https://github.com/androidthings/contrib-drivers#readme</a>
  *
  */
+
+private val TAG = "HomeActivity"
+private val BUTTON_PIN_NAME = "GPIO_174"
+private val LED_PIN_NAME = "GPIO_34"
+
 class HomeActivity : Activity() {
 
-    private val TAG = "HomeActivity"
-
-    private val BUTTON_PIN_NAME = "GPIO_174"
-    private val LED_PIN_NAME = "GPIO_34"
-
     // GPIO connection to button input
-    private lateinit var mButtonGpio: Gpio
+    private var mButtonGpio: Gpio? = null
 
     // GPIO connection to LED output
-    private lateinit var mLedGpio: Gpio
-
-    private lateinit var textView: TextView
+    private var mLedGpio: Gpio? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
-
-        textView = findViewById(R.id.textView)
 
         val service = PeripheralManagerService()
         Log.d(TAG, "Available GPIO: " + service.gpioList)
@@ -58,16 +54,16 @@ class HomeActivity : Activity() {
             // Create GPIO connection.
             mButtonGpio = service.openGpio(BUTTON_PIN_NAME)
             // Configure as an input, trigger events on every change.
-            mButtonGpio.setDirection(Gpio.DIRECTION_IN)
-            mButtonGpio.setEdgeTriggerType(Gpio.EDGE_BOTH)
+            mButtonGpio?.setDirection(Gpio.DIRECTION_IN)
+            mButtonGpio?.setEdgeTriggerType(Gpio.EDGE_BOTH)
             // Value is true when the pin is LOW
-            mButtonGpio.setActiveType(Gpio.ACTIVE_LOW)
+            mButtonGpio?.setActiveType(Gpio.ACTIVE_LOW)
             // Register the event callback.
-            mButtonGpio.registerGpioCallback(mCallback)
+            mButtonGpio?.registerGpioCallback(mCallback)
 
             mLedGpio = service.openGpio(LED_PIN_NAME)
             // Configure as an output.
-            mLedGpio.setDirection(Gpio.DIRECTION_OUT_INITIALLY_LOW)
+            mLedGpio?.setDirection(Gpio.DIRECTION_OUT_INITIALLY_LOW)
 
         } catch (e: IOException) {
             Log.w(TAG, "Error opening GPIO", e)
@@ -79,7 +75,7 @@ class HomeActivity : Activity() {
         override fun onGpioEdge(gpio: Gpio): Boolean {
             try {
                 val buttonValue = gpio.value
-                mLedGpio.value = buttonValue
+                mLedGpio?.value = buttonValue
                 updateText(buttonValue.toString())
                 Log.i(TAG, "GPIO changed, button " + buttonValue)
             } catch (e: IOException) {
@@ -99,16 +95,16 @@ class HomeActivity : Activity() {
         super.onDestroy()
 
         // Close the button
-        mButtonGpio.unregisterGpioCallback(mCallback)
+        mButtonGpio?.unregisterGpioCallback(mCallback)
         try {
-            mButtonGpio.close()
+            mButtonGpio?.close()
         } catch (e: IOException) {
             Log.w(TAG, "Error closing GPIO", e)
         }
 
         // Close the LED.
         try {
-            mLedGpio.close()
+            mLedGpio?.close()
         } catch (e: IOException) {
             Log.e(TAG, "Error closing GPIO", e)
         }
