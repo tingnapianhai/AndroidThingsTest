@@ -3,6 +3,7 @@ package com.example.androidthings.test
 import android.app.Activity
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import com.google.android.things.pio.Gpio
 import com.google.android.things.pio.GpioCallback
 import com.google.android.things.pio.PeripheralManagerService
@@ -47,6 +48,10 @@ class HomeActivity : Activity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
 
+        homeactivity_btn.setOnClickListener {
+            onClickEvent()
+        }
+
         val service = PeripheralManagerService()
         Log.d(TAG, "Available GPIO: " + service.gpioList)
 
@@ -71,6 +76,14 @@ class HomeActivity : Activity() {
 
     }
 
+    private fun onClickEvent() {
+        Toast.makeText(this, "button clicked", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun updateText(textStr: String) {
+        homeactivity_textView.text = textStr
+    }
+
     private val mCallback = object : GpioCallback() {
         override fun onGpioEdge(gpio: Gpio): Boolean {
             try {
@@ -85,10 +98,6 @@ class HomeActivity : Activity() {
             // Return true to keep callback active.
             return true
         }
-    }
-
-    private fun updateText(textStr: String) {
-        textView.text = textStr
     }
 
     override fun onDestroy() {
